@@ -4,6 +4,8 @@ import gleam/option.{type Option, None, Some}
 import gleam/uri
 
 pub type DAVError {
+  XmlParseError(String)
+  UnexpectedXmlFormatError(String)
   UnexpectedResponseError(Response(String))
 }
 

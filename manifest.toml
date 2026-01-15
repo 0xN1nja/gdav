@@ -5,9 +5,13 @@ packages = [
   { name = "gleam_http", version = "4.3.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleam_http", source = "hex", outer_checksum = "82EA6A717C842456188C190AFB372665EA56CE13D8559BF3B1DD9E40F619EE0C" },
   { name = "gleam_stdlib", version = "0.67.1", build_tools = ["gleam"], requirements = [], otp_app = "gleam_stdlib", source = "hex", outer_checksum = "6CE3E4189A8B8EC2F73AB61A2FBDE49F159D6C9C61C49E3B3082E439F260D3D0" },
   { name = "gleeunit", version = "1.9.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleeunit", source = "hex", outer_checksum = "DA9553CE58B67924B3C631F96FE3370C49EB6D6DC6B384EC4862CC4AAA718F3C" },
+  { name = "houdini", version = "1.2.0", build_tools = ["gleam"], requirements = [], otp_app = "houdini", source = "hex", outer_checksum = "5DB1053F1AF828049C2B206D4403C18970ABEF5C18671CA3C2D2ED0DD64F6385" },
+  { name = "htmerl", version = "0.2.1", build_tools = ["rebar3"], requirements = [], otp_app = "htmerl", source = "hex", outer_checksum = "EBD3F54E6DC98594F54BB3C214F5B96CAE90D1AE2A4B7E487FBE94A929110015" },
+  { name = "presentable_soup", version = "1.0.0", build_tools = ["gleam"], requirements = ["gleam_stdlib", "houdini", "htmerl"], otp_app = "presentable_soup", source = "hex", outer_checksum = "F53446C676B2B0CCA17688945AD9E5D111D53A4E292AE6447CB344F5422F58CB" },
 ]
 
 [requirements]
 gleam_http = { version = ">= 4.3.0 and < 5.0.0" }
 gleam_stdlib = { version = ">= 0.44.0 and < 2.0.0" }
 gleeunit = { version = ">= 1.0.0 and < 2.0.0" }
+presentable_soup = { version = ">= 1.0.0 and < 2.0.0" }
