@@ -66,13 +66,7 @@ pub fn response(
         )),
       )
 
-    401 | 403 ->
-      Error(
-        gdav.UnexpectedResponseError(response.set_body(
-          response,
-          "Authentication failed",
-        )),
-      )
+    401 | 403 -> Error(gdav.AuthenticationError("Authentication failed"))
 
     _ ->
       Error(gdav.UnexpectedXmlFormatError(
