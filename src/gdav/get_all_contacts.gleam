@@ -20,19 +20,15 @@ pub fn build(
 ) -> Request(String) {
   let headers = [
     #("Depth", "1"),
-    #("Prefer", "return-minimal"),
     #("Content-Type", "application/xml; charset=utf-8"),
   ]
   let body =
-    "<c:calendar-query xmlns:d=\"DAV:\" xmlns:c=\"urn:ietf:params:xml:ns:caldav\">"
+    "<card:addressbook-query xmlns:d=\"DAV:\" xmlns:card=\"urn:ietf:params:xml:ns:carddav\">"
     <> "<d:prop>"
     <> "<d:getetag />"
-    <> "<c:calendar-data />"
+    <> "<card:address-data />"
     <> "</d:prop>"
-    <> "<c:filter>"
-    <> "<c:comp-filter name=\"VCALENDAR\" />"
-    <> "</c:filter>"
-    <> "</c:calendar-query>"
+    <> "</card:addressbook-query>"
 
   internal.request(
     credentials,
@@ -46,14 +42,14 @@ pub fn build(
 pub fn response(res: Response(String)) -> Result(List(String), gdav.DAVError) {
   case res.status {
     s if s >= 200 && s < 300 -> {
-      let parser = xml.element(res.body, "cal:calendar-data")
+      let parser = xml.element(res.body, "card:address-data")
       xml.parse_element(parser)
     }
     404 ->
       Error(
         gdav.UnexpectedResponseError(response.set_body(
           res,
-          "Resource not found",
+          "Addressbook not found",
         )),
       )
     401 | 403 -> Error(gdav.AuthenticationError("Authentication failed"))

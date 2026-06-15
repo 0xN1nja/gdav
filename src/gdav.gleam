@@ -44,3 +44,15 @@ pub fn with_basic_auth(
 
   Credentials(..credentials, auth_header: Some(auth_header))
 }
+
+pub fn with_bearer_auth(credentials: Credentials, token: String) -> Credentials {
+  Credentials(..credentials, auth_header: Some("Bearer " <> token))
+}
+
+pub type EventEntry {
+  EventEntry(href: String, etag: String, data: String)
+}
+
+pub type ContactEntry {
+  ContactEntry(href: String, etag: String, data: String)
+}
