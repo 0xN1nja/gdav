@@ -17,8 +17,6 @@ fn local_name(tag: String) -> String {
   }
 }
 
-// Decodes the five predefined XML entities. &amp; must be last to avoid
-// double-unescaping (e.g. &amp;quot; → &quot; → ").
 fn unescape(s: String) -> String {
   s
   |> string.replace("&quot;", "\"")
@@ -28,9 +26,6 @@ fn unescape(s: String) -> String {
   |> string.replace("&amp;", "&")
 }
 
-// Strips the trailing "</PREFIX:" that appears before the closing tag localname.
-// After splitting on `local<>`, the raw content ends with `</PREFIX:` (or just `</` if no prefix).
-// This removes everything from the last `</` onwards.
 fn strip_closing_prefix(s: String) -> String {
   let parts = string.split(s, "</")
   case list.reverse(parts) {
@@ -55,8 +50,6 @@ fn do_extract_all(
   local: String,
   acc: List(String),
 ) -> List(String) {
-  // The opening tag ends with `local<>`, and so does the closing tag.
-  // Find the opening, then find the second occurrence to locate the closing.
   case string.split_once(data, local <> ">") {
     Error(_) -> list.reverse(acc)
     Ok(#(_, after_open)) ->
@@ -91,8 +84,6 @@ pub fn split_responses(data: String) -> List(String) {
 }
 
 fn do_split_responses(data: String, acc: List(String)) -> List(String) {
-  // Opening and closing response tags both end with "response>".
-  // Find it twice to extract the inner content, regardless of namespace prefix.
   case string.split_once(data, "response>") {
     Error(_) -> list.reverse(acc)
     Ok(#(_, after_open)) ->
@@ -111,7 +102,6 @@ pub fn parse_nested_href(
   container_tag: String,
 ) -> Result(String, gdav.DAVError) {
   let local = local_name(container_tag)
-  // Both opening and closing tags end with `local<>`, so find it twice.
   case string.split_once(data, local <> ">") {
     Error(_) ->
       Error(gdav.XmlParseError("No " <> container_tag <> " element found"))

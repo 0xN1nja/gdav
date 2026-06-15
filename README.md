@@ -57,7 +57,8 @@ pub fn main() {
     |> hackney.send
 
   let assert Ok(events) = get_all_events.response(res)
-  io.debug(events)
+
+  echo events
 }
 ```
 
