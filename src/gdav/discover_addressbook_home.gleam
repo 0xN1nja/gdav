@@ -4,7 +4,6 @@ import gdav/internal/xml
 import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
-import gleam/int
 
 pub type RequestBuilder {
   RequestBuilder(principal_path: String)
@@ -38,14 +37,11 @@ pub fn build(
   )
 }
 
-pub fn response(res: Response(String)) -> Result(String, gdav.DAVError) {
+pub fn response(res: Response(String)) -> Result(String, gdav.DavError) {
   case res.status {
     s if s >= 200 && s < 300 ->
       xml.parse_nested_href(res.body, "card:addressbook-home-set")
-    401 | 403 -> Error(gdav.AuthenticationError("Authentication failed"))
-    _ ->
-      Error(gdav.UnexpectedXmlFormatError(
-        "Unexpected HTTP status: " <> int.to_string(res.status),
-      ))
+    401 | 403 -> Error(gdav.AuthenticationFailed)
+    _ -> Error(gdav.UnexpectedResponse(res))
   }
 }

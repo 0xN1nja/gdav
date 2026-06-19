@@ -1,35 +1,39 @@
 import gleam/bit_array
+import gleam/http
 import gleam/http/response.{type Response}
 import gleam/option.{type Option, None, Some}
+import gleam/result
 import gleam/uri
 
-pub type DAVError {
-  AuthenticationError(String)
+pub type DavError {
+  AuthenticationFailed
+  NotFound
   XmlParseError(String)
-  UnexpectedXmlFormatError(String)
-  UnexpectedResponseError(Response(String))
+  UnexpectedResponse(Response(String))
 }
 
 pub type Credentials {
   Credentials(
-    scheme: Option(String),
+    scheme: http.Scheme,
     port: Option(Int),
-    host: Option(String),
+    host: String,
     path: String,
     auth_header: Option(String),
   )
 }
 
-pub fn credentials(base_url: String) {
-  let assert Ok(parsed_uri) = uri.parse(base_url)
-
-  Credentials(
-    scheme: parsed_uri.scheme,
-    host: parsed_uri.host,
+pub fn credentials(base_url: String) -> Result(Credentials, Nil) {
+  use parsed_uri <- result.try(uri.parse(base_url))
+  use scheme_str <- result.try(option.to_result(parsed_uri.scheme, Nil))
+  use scheme <- result.try(http.scheme_from_string(scheme_str))
+  use host <- result.try(option.to_result(parsed_uri.host, Nil))
+  Ok(Credentials(
+    scheme:,
+    host:,
     port: parsed_uri.port,
     path: parsed_uri.path,
     auth_header: None,
-  )
+  ))
 }
 
 pub fn with_basic_auth(

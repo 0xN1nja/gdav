@@ -3,7 +3,6 @@ import gdav/internal
 import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
-import gleam/int
 import gleam/list
 import gleam/string
 
@@ -48,23 +47,17 @@ pub fn build(
   )
 }
 
-pub fn response(res: Response(String)) -> Result(DiscoveryResult, gdav.DAVError) {
+pub fn response(res: Response(String)) -> Result(DiscoveryResult, gdav.DavError) {
   case res.status {
     s if s >= 300 && s < 400 -> {
       case
         list.find(res.headers, fn(h) { string.lowercase(h.0) == "location" })
       {
         Ok(#(_, url)) -> Ok(Redirected(url))
-        Error(_) ->
-          Error(gdav.UnexpectedXmlFormatError(
-            "Redirect response missing Location header",
-          ))
+        Error(_) -> Error(gdav.UnexpectedResponse(res))
       }
     }
     s if s >= 200 && s < 300 -> Ok(Confirmed)
-    _ ->
-      Error(gdav.UnexpectedXmlFormatError(
-        "Service discovery failed with status " <> int.to_string(res.status),
-      ))
+    _ -> Error(gdav.UnexpectedResponse(res))
   }
 }

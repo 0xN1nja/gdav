@@ -21,17 +21,16 @@ gleam add gdav@1
 **Basic** — username and password, works with most self-hosted servers:
 
 ```gleam
-let creds =
+let assert Ok(creds) =
   gdav.credentials("https://dav.example.com/")
-  |> gdav.with_basic_auth("username", "password")
+let creds = gdav.with_basic_auth(creds, "username", "password")
 ```
 
 **Bearer** — OAuth2 access token, required for Google Calendar, Fastmail, and other hosted providers:
 
 ```gleam
-let creds =
-  gdav.credentials("https://dav.example.com/")
-  |> gdav.with_bearer_auth("your_oauth_access_token")
+let assert Ok(creds) = gdav.credentials("https://dav.example.com/")
+let creds = gdav.with_bearer_auth(creds, "your_oauth_access_token")
 ```
 
 ## Quickstart — known collection path
@@ -47,9 +46,8 @@ import gleam/hackney
 import gleam/io
 
 pub fn main() {
-  let creds =
-    gdav.credentials("http://localhost:port/")
-    |> gdav.with_basic_auth("admin", "admin")
+  let assert Ok(creds) = gdav.credentials("http://localhost:port/")
+  let creds = gdav.with_basic_auth(creds, "admin", "admin")
 
   let assert Ok(res) =
     get_all_events.request("/admin/my-calendar-uuid")
@@ -76,9 +74,8 @@ import gdav/get_all_events
 import gleam/hackney
 
 pub fn main() {
-  let creds =
-    gdav.credentials("https://dav.example.com/dav.php")
-    |> gdav.with_basic_auth("username", "password")
+  let assert Ok(creds) = gdav.credentials("https://dav.example.com/dav.php")
+  let creds = gdav.with_basic_auth(creds, "username", "password")
 
   // Step 1: find the user's principal URL
   let assert Ok(res) =

@@ -4,7 +4,6 @@ import gdav/internal/xml
 import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
-import gleam/int
 
 pub type RequestBuilder {
   RequestBuilder(collection_path: String)
@@ -39,23 +38,14 @@ pub fn build(
   )
 }
 
-pub fn response(res: Response(String)) -> Result(List(String), gdav.DAVError) {
+pub fn response(res: Response(String)) -> Result(List(String), gdav.DavError) {
   case res.status {
     s if s >= 200 && s < 300 -> {
       let parser = xml.element(res.body, "card:address-data")
       xml.parse_element(parser)
     }
-    404 ->
-      Error(
-        gdav.UnexpectedResponseError(response.set_body(
-          res,
-          "Addressbook not found",
-        )),
-      )
-    401 | 403 -> Error(gdav.AuthenticationError("Authentication failed"))
-    _ ->
-      Error(gdav.UnexpectedXmlFormatError(
-        "Unexpected HTTP status: " <> int.to_string(res.status),
-      ))
+    404 -> Error(gdav.NotFound)
+    401 | 403 -> Error(gdav.AuthenticationFailed)
+    _ -> Error(gdav.UnexpectedResponse(res))
   }
 }

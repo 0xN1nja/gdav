@@ -3,7 +3,6 @@ import gdav/internal
 import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
-import gleam/int
 import gleam/option.{type Option, None, Some}
 
 pub type RequestBuilder {
@@ -40,15 +39,11 @@ pub fn build(
   )
 }
 
-pub fn response(res: Response(String)) -> Result(Nil, gdav.DAVError) {
+pub fn response(res: Response(String)) -> Result(Nil, gdav.DavError) {
   case res.status {
     s if s >= 200 && s < 300 -> Ok(Nil)
-    404 ->
-      Error(gdav.UnexpectedResponseError(response.set_body(res, "Not found")))
-    401 | 403 -> Error(gdav.AuthenticationError("Authentication failed"))
-    _ ->
-      Error(gdav.UnexpectedXmlFormatError(
-        "Unexpected HTTP status: " <> int.to_string(res.status),
-      ))
+    404 -> Error(gdav.NotFound)
+    401 | 403 -> Error(gdav.AuthenticationFailed)
+    _ -> Error(gdav.UnexpectedResponse(res))
   }
 }

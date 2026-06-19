@@ -4,7 +4,6 @@ import gdav/internal/xml
 import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
-import gleam/int
 import gleam/list
 import gleam/string
 
@@ -48,7 +47,7 @@ pub fn build(
   )
 }
 
-pub fn response(res: Response(String)) -> Result(SyncResult, gdav.DAVError) {
+pub fn response(res: Response(String)) -> Result(SyncResult, gdav.DavError) {
   case res.status {
     s if s >= 200 && s < 300 -> {
       let data = res.body
@@ -89,10 +88,7 @@ pub fn response(res: Response(String)) -> Result(SyncResult, gdav.DAVError) {
 
       Ok(SyncResult(changed:, deleted:, sync_token:))
     }
-    401 | 403 -> Error(gdav.AuthenticationError("Authentication failed"))
-    _ ->
-      Error(gdav.UnexpectedXmlFormatError(
-        "Unexpected HTTP status: " <> int.to_string(res.status),
-      ))
+    401 | 403 -> Error(gdav.AuthenticationFailed)
+    _ -> Error(gdav.UnexpectedResponse(res))
   }
 }

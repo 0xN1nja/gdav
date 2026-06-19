@@ -37,7 +37,7 @@ fn strip_closing_prefix(s: String) -> String {
 
 pub fn parse_element(
   parser: ElementParser,
-) -> Result(List(String), gdav.DAVError) {
+) -> Result(List(String), gdav.DavError) {
   let local = local_name(parser.tag)
   case do_extract_all(parser.data, local, []) {
     [] -> Error(gdav.XmlParseError("No " <> parser.tag <> " elements found"))
@@ -63,7 +63,7 @@ fn do_extract_all(
   }
 }
 
-pub fn parse_first(data: String, tag: String) -> Result(String, gdav.DAVError) {
+pub fn parse_first(data: String, tag: String) -> Result(String, gdav.DavError) {
   let local = local_name(tag)
   case string.split_once(data, local <> ">") {
     Error(_) -> Error(gdav.XmlParseError("No " <> tag <> " element found"))
@@ -100,7 +100,7 @@ fn do_split_responses(data: String, acc: List(String)) -> List(String) {
 pub fn parse_nested_href(
   data: String,
   container_tag: String,
-) -> Result(String, gdav.DAVError) {
+) -> Result(String, gdav.DavError) {
   let local = local_name(container_tag)
   case string.split_once(data, local <> ">") {
     Error(_) ->
@@ -119,7 +119,7 @@ pub fn parse_nested_href(
 
 pub fn parse_etag_list(
   data: String,
-) -> Result(List(#(String, String)), gdav.DAVError) {
+) -> Result(List(#(String, String)), gdav.DavError) {
   let pairs =
     split_responses(data)
     |> list.filter_map(fn(block) {

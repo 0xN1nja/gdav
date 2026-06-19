@@ -8,17 +8,17 @@ import gdav/get_etags
 import gleam/hackney
 import gleam/list
 
-pub const calendar_collection_path = "/admin/89b1a477-c5fa-c1ad-d2fc-6d59ce80f936"
+pub const calendar_collection_path = "/dav.php/calendars/abhimanyu/default"
 
-pub const addressbook_collection_path = "/admin/contacts"
+pub const addressbook_collection_path = "/dav.php/addressbooks/abhimanyu/default"
 
 pub const test_event_filename = "gdav-test-event.ics"
 
 pub const test_contact_filename = "gdav-test-contact.vcf"
 
-pub const test_event_path = "/admin/89b1a477-c5fa-c1ad-d2fc-6d59ce80f936/gdav-test-event.ics"
+pub const test_event_path = "/dav.php/calendars/abhimanyu/default/gdav-test-event.ics"
 
-pub const test_contact_path = "/admin/contacts/gdav-test-contact.vcf"
+pub const test_contact_path = "/dav.php/addressbooks/abhimanyu/default/gdav-test-contact.vcf"
 
 pub const test_icalstring = "BEGIN:VCALENDAR
 VERSION:2.0
@@ -61,8 +61,10 @@ TEL;TYPE=cell:1111111111
 END:VCARD"
 
 pub fn creds() -> gdav.Credentials {
-  gdav.credentials("http://localhost:5232/")
-  |> gdav.with_basic_auth("admin", "admin")
+  let assert Ok(credentials) =
+    gdav.credentials("http://localhost:8080/dav.php/")
+  credentials
+  |> gdav.with_basic_auth("abhimanyu", "admin")
 }
 
 pub fn cleanup_event() -> Nil {

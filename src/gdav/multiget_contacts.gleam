@@ -4,7 +4,6 @@ import gdav/internal/xml
 import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
-import gleam/int
 import gleam/list
 import gleam/string
 
@@ -48,7 +47,7 @@ pub fn build(
 
 pub fn response(
   res: Response(String),
-) -> Result(List(ContactEntry), gdav.DAVError) {
+) -> Result(List(ContactEntry), gdav.DavError) {
   case res.status {
     s if s >= 200 && s < 300 -> {
       let entries =
@@ -66,17 +65,8 @@ pub fn response(
         })
       Ok(entries)
     }
-    404 ->
-      Error(
-        gdav.UnexpectedResponseError(response.set_body(
-          res,
-          "Addressbook not found",
-        )),
-      )
-    401 | 403 -> Error(gdav.AuthenticationError("Authentication failed"))
-    _ ->
-      Error(gdav.UnexpectedXmlFormatError(
-        "Unexpected HTTP status: " <> int.to_string(res.status),
-      ))
+    404 -> Error(gdav.NotFound)
+    401 | 403 -> Error(gdav.AuthenticationFailed)
+    _ -> Error(gdav.UnexpectedResponse(res))
   }
 }
