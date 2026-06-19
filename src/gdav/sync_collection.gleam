@@ -5,7 +5,7 @@ import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/list
-import gleam/string
+import gleam/result
 
 pub type SyncResult {
   SyncResult(
@@ -50,41 +50,23 @@ pub fn build(
 pub fn response(res: Response(String)) -> Result(SyncResult, gdav.DavError) {
   case res.status {
     s if s >= 200 && s < 300 -> {
-      let data = res.body
-      let blocks = xml.split_responses(data)
+      use #(responses, sync_token) <- result.try(xml.parse_sync_report(res.body))
 
       let changed =
-        list.filter_map(blocks, fn(block) {
-          case xml.parse_first(block, "d:getetag") {
-            Ok(etag) ->
-              case xml.parse_first(block, "d:href") {
-                Ok(href) -> Ok(#(href, etag))
-                Error(e) -> Error(e)
-              }
-            Error(_) -> Error(gdav.XmlParseError(""))
+        list.filter_map(responses, fn(r) {
+          case xml.find_text(r.properties, xml.ns_dav, "getetag") {
+            Ok(etag) if etag != "" -> Ok(#(r.href, etag))
+            _ -> Error(Nil)
           }
         })
 
       let deleted =
-        list.filter_map(blocks, fn(block) {
-          case xml.parse_first(block, "d:getetag") {
-            Ok(_) -> Error(Nil)
-            Error(_) ->
-              case xml.parse_first(block, "d:href") {
-                Ok(href) ->
-                  case string.contains(block, "404") {
-                    True -> Ok(href)
-                    False -> Error(Nil)
-                  }
-                Error(_) -> Error(Nil)
-              }
+        list.filter_map(responses, fn(r) {
+          case r.status_code {
+            404 -> Ok(r.href)
+            _ -> Error(Nil)
           }
         })
-
-      let sync_token = case xml.parse_first(data, "d:sync-token") {
-        Ok(t) -> t
-        Error(_) -> ""
-      }
 
       Ok(SyncResult(changed:, deleted:, sync_token:))
     }

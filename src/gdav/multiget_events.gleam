@@ -5,6 +5,7 @@ import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/list
+import gleam/result
 import gleam/string
 
 pub type RequestBuilder {
@@ -51,16 +52,16 @@ pub fn response(
 ) -> Result(List(EventEntry), gdav.DavError) {
   case res.status {
     s if s >= 200 && s < 300 -> {
+      use responses <- result.try(xml.parse_multistatus(res.body))
       let entries =
-        xml.split_responses(res.body)
-        |> list.filter_map(fn(block) {
+        list.filter_map(responses, fn(r) {
+          let find = fn(ns, local) { xml.find_text(r.properties, ns, local) }
           case
-            xml.parse_first(block, "d:href"),
-            xml.parse_first(block, "d:getetag"),
-            xml.parse_first(block, "cal:calendar-data")
+            find(xml.ns_dav, "getetag"),
+            find(xml.ns_caldav, "calendar-data")
           {
-            Ok(href), Ok(etag), Ok(data) -> Ok(EventEntry(href:, etag:, data:))
-            _, _, _ -> Error(Nil)
+            Ok(etag), Ok(data) -> Ok(EventEntry(href: r.href, etag:, data:))
+            _, _ -> Error(Nil)
           }
         })
       Ok(entries)

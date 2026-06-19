@@ -32,8 +32,6 @@ pub fn main() {
   gleeunit.main()
 }
 
-// CalDAV
-
 pub fn caldav_discover_principal_test() {
   let assert Ok(res) =
     discover_principal.request()
@@ -251,8 +249,6 @@ pub fn caldav_delete_event_test() {
     |> hackney.send
   let assert Error(_) = get_event.response(res)
 }
-
-// CardDAV
 
 pub fn carddav_discover_addressbook_home_test() {
   let assert Ok(res) =

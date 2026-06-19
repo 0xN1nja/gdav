@@ -5,6 +5,7 @@ import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/list
+import gleam/result
 
 pub type Addressbook {
   Addressbook(href: String, displayname: String, ctag: String)
@@ -49,17 +50,14 @@ pub fn response(
 ) -> Result(List(Addressbook), gdav.DavError) {
   case res.status {
     s if s >= 200 && s < 300 -> {
+      use responses <- result.try(xml.parse_multistatus(res.body))
       let addressbooks =
-        xml.split_responses(res.body)
-        |> list.filter_map(fn(block) {
-          case
-            xml.parse_first(block, "d:href"),
-            xml.parse_first(block, "d:displayname"),
-            xml.parse_first(block, "cs:getctag")
-          {
-            Ok(href), Ok(displayname), Ok(ctag) ->
-              Ok(Addressbook(href:, displayname:, ctag:))
-            _, _, _ -> Error(Nil)
+        list.filter_map(responses, fn(r) {
+          let find = fn(ns, local) { xml.find_text(r.properties, ns, local) }
+          case find(xml.ns_dav, "displayname"), find(xml.ns_cs, "getctag") {
+            Ok(displayname), Ok(ctag) ->
+              Ok(Addressbook(href: r.href, displayname:, ctag:))
+            _, _ -> Error(Nil)
           }
         })
       Ok(addressbooks)

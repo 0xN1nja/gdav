@@ -4,6 +4,7 @@ import gdav/internal/xml
 import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
+import xmlm
 
 pub type RequestBuilder {
   RequestBuilder(principal_path: String)
@@ -40,7 +41,10 @@ pub fn build(
 pub fn response(res: Response(String)) -> Result(String, gdav.DavError) {
   case res.status {
     s if s >= 200 && s < 300 ->
-      xml.parse_nested_href(res.body, "cal:calendar-home-set")
+      xml.parse_single_value(
+        res.body,
+        xmlm.Name(xml.ns_caldav, "calendar-home-set"),
+      )
     401 | 403 -> Error(gdav.AuthenticationFailed)
     _ -> Error(gdav.UnexpectedResponse(res))
   }

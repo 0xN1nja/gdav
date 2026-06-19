@@ -5,6 +5,7 @@ import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/option
+import xmlm
 
 pub type RequestBuilder {
   RequestBuilder(path: option.Option(String))
@@ -40,7 +41,10 @@ pub fn build(
 pub fn response(res: Response(String)) -> Result(String, gdav.DavError) {
   case res.status {
     s if s >= 200 && s < 300 ->
-      xml.parse_nested_href(res.body, "d:current-user-principal")
+      xml.parse_single_value(
+        res.body,
+        xmlm.Name(xml.ns_dav, "current-user-principal"),
+      )
     401 | 403 -> Error(gdav.AuthenticationFailed)
     _ -> Error(gdav.UnexpectedResponse(res))
   }

@@ -5,6 +5,7 @@ import gleam/http
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/option.{type Option, None, Some}
+import gleam/result
 
 pub type AddressbookInfo {
   AddressbookInfo(displayname: String, ctag: String, sync_token: Option(String))
@@ -47,20 +48,18 @@ pub fn build(
 pub fn response(res: Response(String)) -> Result(AddressbookInfo, gdav.DavError) {
   case res.status {
     s if s >= 200 && s < 300 -> {
-      let data = res.body
-      case
-        xml.parse_first(data, "d:displayname"),
-        xml.parse_first(data, "cs:getctag")
-      {
+      use r <- result.try(xml.parse_propfind(res.body))
+      let find = fn(ns, local) { xml.find_text(r.properties, ns, local) }
+      case find(xml.ns_dav, "displayname"), find(xml.ns_cs, "getctag") {
         Ok(displayname), Ok(ctag) -> {
-          let sync_token = case xml.parse_first(data, "d:sync-token") {
-            Ok(t) -> Some(t)
-            Error(_) -> None
+          let sync_token = case find(xml.ns_dav, "sync-token") {
+            Ok(t) if t != "" -> Some(t)
+            _ -> None
           }
           Ok(AddressbookInfo(displayname:, ctag:, sync_token:))
         }
-        Error(e), _ -> Error(e)
-        _, Error(e) -> Error(e)
+        Error(_), _ -> Error(gdav.XmlParseError("Missing displayname"))
+        _, Error(_) -> Error(gdav.XmlParseError("Missing ctag"))
       }
     }
     404 -> Error(gdav.NotFound)
