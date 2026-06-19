@@ -33,7 +33,7 @@ pub fn parse_propfind(body: String) -> Result(DavResponse, gdav.DavError) {
   use responses <- result.try(parse_multistatus(body))
   case responses {
     [r, ..] -> Ok(r)
-    [] -> Error(gdav.XmlParseError("Empty multistatus response"))
+    [] -> Error(gdav.CouldNotParseXml("Empty multistatus response"))
   }
 }
 
@@ -43,7 +43,7 @@ pub fn parse_sync_report(
   xmlm.from_string(body)
   |> do_parse_multistatus
   |> result.map_error(fn(e) {
-    gdav.XmlParseError(xmlm.input_error_to_string(e))
+    gdav.CouldNotParseXml(xmlm.input_error_to_string(e))
   })
 }
 
@@ -62,7 +62,7 @@ pub fn parse_single_value(
   {
     Ok(href) -> Ok(href)
     Error(_) ->
-      Error(gdav.XmlParseError("Property not found: " <> container.local))
+      Error(gdav.CouldNotParseXml("Property not found: " <> container.local))
   }
 }
 

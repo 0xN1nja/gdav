@@ -59,8 +59,8 @@ pub fn response(res: Response(String)) -> Result(CalendarInfo, gdav.DavError) {
           }
           Ok(CalendarInfo(displayname:, ctag:, sync_token:))
         }
-        Error(_), _ -> Error(gdav.XmlParseError("Missing displayname"))
-        _, Error(_) -> Error(gdav.XmlParseError("Missing ctag"))
+        Error(_), _ -> Error(gdav.CouldNotParseXml("Missing displayname"))
+        _, Error(_) -> Error(gdav.CouldNotParseXml("Missing ctag"))
       }
     }
     404 -> Error(gdav.NotFound)

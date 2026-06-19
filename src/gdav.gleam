@@ -8,7 +8,7 @@ import gleam/uri
 pub type DavError {
   AuthenticationFailed
   NotFound
-  XmlParseError(String)
+  CouldNotParseXml(String)
   UnexpectedResponse(Response(String))
 }
 

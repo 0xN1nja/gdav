@@ -210,14 +210,14 @@ pub fn parse_single_value_missing_test() {
     <> "</d:multistatus>"
   xml.parse_single_value(body, xmlm_name(xml.ns_dav, "current-user-principal"))
   |> should.equal(
-    Error(gdav.XmlParseError("Property not found: current-user-principal")),
+    Error(gdav.CouldNotParseXml("Property not found: current-user-principal")),
   )
 }
 
 pub fn malformed_xml_returns_error_test() {
   let body = "<not valid xml <<<"
   case xml.parse_multistatus(body) {
-    Error(gdav.XmlParseError(_)) -> should.be_ok(Ok(Nil))
+    Error(gdav.CouldNotParseXml(_)) -> should.be_ok(Ok(Nil))
     other -> should.be_ok(Error(other))
   }
 }
